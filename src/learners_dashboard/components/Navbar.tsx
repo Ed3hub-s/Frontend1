@@ -26,9 +26,15 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, setActivePage }) => {
     // { id: 'community', label: 'Community' },
     { id: 'chat', label: 'Chat with tutor' },
     { id: 'tokens', label: 'Tokens' },
+    { id: 'liveClasses', label: 'Live Classes' },
   ];
 
   const handleNavClick = (id: string) => {
+    if (id === 'liveClasses') {
+      router.push('/live-classes/my');
+      setIsMenuOpen(false);
+      return;
+    }
     setActivePage(id);
     setIsMenuOpen(false);
     if (id === 'chat') setUnreadCount(0);

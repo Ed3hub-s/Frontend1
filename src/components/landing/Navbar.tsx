@@ -35,6 +35,7 @@ const Navbar: React.FC = () => {
 
   const navLinks: NavigationItem[] = [
     { name: "Courses", href: "/courses" },
+    { name: "Live Classes", href: "/live-classes" },
     { name: "Tutors", href: "/tutors" },
     { name: "Community", href: "/community" },
     { name: "About Us", href: "/about-us" },

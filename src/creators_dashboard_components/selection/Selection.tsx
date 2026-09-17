@@ -1,4 +1,6 @@
 import React from "react";
+import Link from "next/link";
+import { Radio } from "lucide-react";
 
 interface SelectionProps {
   selected: string;
@@ -29,6 +31,13 @@ const Selection: React.FC<SelectionProps> = ({ selected, setSelected, activeTab 
             <p className="hidden md:block text-xs md:text-[13px]">My Courses</p>
           </div>
           {/* Upload Course */}
+          <Link
+            href="/live-classes/manage"
+            className="flex items-center justify-center md:justify-start text-[#5a5a5a] hover:text-[#007ED7] w-12 h-12 md:w-auto md:h-auto gap-3 md:gap-4 font-medium p-2 md:p-0 rounded-md transition-colors border md:border-0"
+          >
+            <Radio size={16} />
+            <p className="hidden md:block text-xs md:text-[13px]">Live Classes</p>
+          </Link>
           <div
             className={`flex items-center justify-center md:justify-start ${
               selected === "Upload courses" ? "text-[#007ED7]" : "text-[#5a5a5a]"
