@@ -76,6 +76,7 @@ export default function LiveClassDetailPage({ params }: { params: Promise<{ slug
       <Link href="/live-classes" className="lc-back"><ArrowLeft /> Back to class board</Link>
       <header className="lc-detail-head">
         <div className="lc-detail-copy">
+          {item.cover_image_url && <div className="lc-detail-cover"><Image src={item.cover_image_url} alt={`${item.title} cover`} fill sizes="(max-width: 800px) 100vw, 60vw" priority /></div>}
           <div className="lc-meta-line"><span>{item.category}</span><span>{item.level.replace('_', ' ')}</span>{item.status === 'live' && <span className="is-live">Live now</span>}</div>
           <h1>{item.title}</h1>
           <p className="lc-detail-intro">{item.description}</p>

@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         hostname: 'dev-api.ed3hub.com',
       },
       {
+        protocol: 'https',
+        hostname: 'media.ed3hub.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '8000',

@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import { liveClassesApi } from '@/lib/liveClasses';
 import { ArrowLeft, ArrowRight, ImagePlus, Radio, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
@@ -18,10 +19,16 @@ function CreateLiveClassForm() {
   const [access, setAccess] = useState('free');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [coverPreview, setCoverPreview] = useState('');
+  const [coverName, setCoverName] = useState('');
 
   useEffect(() => {
     if (user?.role === 'educator') api.get('/courses/my/courses/').then(({ data }) => setCourses(data)).catch(() => {});
   }, [user]);
+
+  useEffect(() => () => {
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+  }, [coverPreview]);
 
   if (!loading && user?.role !== 'educator') return <div className="lc-page-status">Only educator accounts can create live classes.</div>;
 
@@ -57,7 +64,12 @@ function CreateLiveClassForm() {
             <label className="lc-field lc-field-wide"><span>Description</span><textarea name="description" required rows={5} placeholder="Give learners a clear picture of the session." /></label>
             <label className="lc-field"><span>Category</span><select name="category" required defaultValue=""><option value="" disabled>Choose a topic</option>{categories.map((item) => <option key={item}>{item}</option>)}</select></label>
             <label className="lc-field"><span>Level</span><select name="level" required defaultValue="beginner"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option><option value="all_levels">All levels</option></select></label>
-            <label className="lc-field lc-field-wide lc-file"><span>Cover image</span><input type="file" name="cover_image" accept="image/*" required /><div><ImagePlus /><strong>Choose a class cover</strong><small>Landscape JPG, PNG or WebP</small></div></label>
+            <label className="lc-field lc-field-wide lc-file"><span>Cover image</span><input type="file" name="cover_image" accept="image/jpeg,image/png,image/webp" required onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+              if (!file) return;
+              setCoverName(file.name);
+              setCoverPreview(URL.createObjectURL(file));
+            }} /><div className={coverPreview ? 'lc-file-preview has-image' : 'lc-file-preview'}>{coverPreview ? <><Image src={coverPreview} alt="Selected class cover preview" fill unoptimized /><span><strong>{coverName}</strong><small>Click to choose a different image</small></span></> : <><ImagePlus /><strong>Choose a class cover</strong><small>Landscape JPG, PNG or WebP</small></>}</div></label>
           </div>
         </section>
 
