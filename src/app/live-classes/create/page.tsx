@@ -21,6 +21,7 @@ function CreateLiveClassForm() {
   const [error, setError] = useState('');
   const [coverPreview, setCoverPreview] = useState('');
   const [coverName, setCoverName] = useState('');
+  const [startNow, setStartNow] = useState(false);
 
   useEffect(() => {
     if (user?.role === 'educator') api.get('/courses/my/courses/').then(({ data }) => setCourses(data)).catch(() => {});
@@ -39,6 +40,11 @@ function CreateLiveClassForm() {
     if (access === 'free') form.set('price', '0');
     form.set('status', 'published');
     form.set('recording_enabled', form.get('recording_enabled') ? 'true' : 'false');
+    form.set('start_now', startNow ? 'true' : 'false');
+    if (startNow) {
+      form.delete('scheduled_date');
+      form.delete('scheduled_time');
+    }
     if (!form.get('course')) form.delete('course');
     try {
       const { data } = await liveClassesApi.create(form);
@@ -75,9 +81,10 @@ function CreateLiveClassForm() {
 
         <section>
           <div className="lc-form-section-head"><b>2</b><div><h2>Time and room</h2><p>Capacity includes every learner with active or pending access.</p></div></div>
+          <label className="lc-check lc-start-now"><input type="checkbox" checked={startNow} onChange={(event) => setStartNow(event.target.checked)} /><span><strong>Start immediately</strong><small>Publish the class now and open its join window immediately.</small></span></label>
           <div className="lc-fields">
-            <label className="lc-field"><span>Date</span><input type="date" name="scheduled_date" required /></label>
-            <label className="lc-field"><span>Start time</span><input type="time" name="scheduled_time" required /></label>
+            <label className="lc-field"><span>Date</span><input type="date" name="scheduled_date" required={!startNow} disabled={startNow} /></label>
+            <label className="lc-field"><span>Start time</span><input type="time" name="scheduled_time" required={!startNow} disabled={startNow} /></label>
             <label className="lc-field"><span>Duration</span><input type="number" name="duration_minutes" min="15" step="15" defaultValue="60" required /></label>
             <label className="lc-field"><span>Capacity</span><input type="number" name="capacity" min="1" max="100" defaultValue="25" required /></label>
             <label className="lc-field lc-field-wide"><span>Connect a course (optional)</span><select name="course" defaultValue=""><option value="">Standalone live class</option>{courses.map((course) => <option value={course.id} key={course.id}>{course.title}</option>)}</select></label>

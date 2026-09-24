@@ -171,6 +171,8 @@ html, body { overflow-x: clip; }
 .lc-check input { width: 1.1rem; height: 1.1rem; accent-color: var(--color-live-brand); }
 .lc-check span { display: flex; flex-direction: column; }
 .lc-check small { color: var(--color-live-muted); margin-top: .25rem; }
+.lc-start-now { margin: 0 0 var(--space-live-5); padding: var(--space-live-4); border: var(--rule-live); border-radius: var(--radius-live-md); background: color-mix(in oklch, var(--color-live-brand) 5%, var(--color-live-surface)); }
+.lc-button-danger { border-color: color-mix(in oklch, var(--color-live-danger) 35%, transparent); color: var(--color-live-danger); }
 .lc-form-submit { padding-top: var(--space-live-6); display: flex; justify-content: flex-end; align-items: center; gap: var(--space-live-6); }
 .lc-form-submit p { max-width: 31rem; margin: 0; color: var(--color-live-muted); font-size: .75rem; line-height: 1.5; }
 
