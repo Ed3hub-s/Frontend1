@@ -196,6 +196,8 @@ html, body { overflow-x: clip; }
 .lc-classroom-bar a { display: inline-flex; align-items: center; gap: .4rem; color: var(--color-live-surface); text-decoration: none; font-weight: 700; }
 .lc-classroom-bar svg { width: .9rem; }
 .lc-classroom-mount, .lc-classroom-mount rtk-meeting { display: block; width: 100%; height: calc(100svh - 8.25rem); }
+.lc-classroom-mount { position: relative; }
+.lc-classroom-retry { position: absolute; bottom: var(--space-live-6); left: 50%; transform: translateX(-50%); z-index: 3; }
 .lc-classroom-state { position: absolute; z-index: 2; inset: 3.5rem 0 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: var(--color-live-ink); }
 .lc-classroom-state > svg { width: 2rem; height: 2rem; color: var(--color-live-accent); }
 .lc-classroom-state h1 { margin: var(--space-live-4) 0 var(--space-live-2); font-size: clamp(1.5rem, 4vw, 2.5rem); }
