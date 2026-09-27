@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useCallback, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -18,6 +18,9 @@ export default function LiveClassDetailPage({ params }: { params: Promise<{ slug
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageIsError, setMessageIsError] = useState(false);
+  const verifiedCallback = useRef('');
+  const paymentReference = searchParams.get('reference') || searchParams.get('trxref') || undefined;
   const [recordings, setRecordings] = useState<{ id: number; duration_seconds: number; access_url: string }[]>([]);
 
   const load = useCallback(() => liveClassesApi.detail(slug).then(({ data }) => setItem(data)).finally(() => setLoading(false)), [slug]);
@@ -29,19 +32,36 @@ export default function LiveClassDetailPage({ params }: { params: Promise<{ slug
     api.get(`/live-classes/${slug}/recordings/`).then(({ data }) => setRecordings(data)).catch(() => {});
   }, [item, slug]);
 
-  useEffect(() => {
-    const reference = searchParams.get('reference') || searchParams.get('trxref');
-    if (!reference || !user || searchParams.get('payment') !== 'verify') return;
+  const confirmPayment = useCallback(async () => {
     setWorking(true);
-    liveClassesApi.verifyPayment(slug, reference)
-      .then(() => { setMessage('Payment confirmed. Your classroom access is active.'); return load(); })
-      .catch(() => setMessage('We could not confirm that payment yet. You can retry from this page.'))
-      .finally(() => setWorking(false));
-  }, [load, searchParams, slug, user]);
+    setMessageIsError(false);
+    try {
+      const { data } = await liveClassesApi.verifyPayment(slug, paymentReference);
+      const active = data.access_status === 'active';
+      setMessageIsError(!active);
+      setMessage(active ? 'Payment confirmed. Your classroom access is active.' : 'This booking is no longer active. Please contact support.');
+      await load();
+      if (active) router.replace(`/live-classes/${slug}`, { scroll: false });
+    } catch {
+      setMessageIsError(true);
+      setMessage('We could not confirm that payment yet. Use Check payment to retry before paying again.');
+    } finally { setWorking(false); }
+  }, [load, paymentReference, router, slug]);
+
+  useEffect(() => {
+    if (!paymentReference || !user) return;
+    const key = `${slug}:${user.id}:${paymentReference}`;
+    if (verifiedCallback.current === key) return;
+    verifiedCallback.current = key;
+    void confirmPayment();
+  }, [confirmPayment, paymentReference, slug, user]);
 
   const register = async () => {
-    if (!user) { router.push(`/sign-in?next=/live-classes/${slug}`); return; }
-    setWorking(true); setMessage('');
+    if (!user) {
+      router.push(`/sign-in?next=${encodeURIComponent(`/live-classes/${slug}${searchParams.size ? `?${searchParams.toString()}` : ''}`)}`);
+      return;
+    }
+    setWorking(true); setMessage(''); setMessageIsError(false);
     try {
       const { data } = await liveClassesApi.register(slug);
       if (data.checkout?.authorization_url) {
@@ -50,8 +70,11 @@ export default function LiveClassDetailPage({ params }: { params: Promise<{ slug
       }
       setMessage('Your place is reserved. We will remind you before class.');
       await load();
-    } catch (error: any) {
-      setMessage(error?.response?.data?.detail || error?.response?.data?.[0] || 'Registration could not be completed.');
+    } catch (error: unknown) {
+      const response = error as { response?: { data?: { detail?: string } | string[] } };
+      const data = response.response?.data;
+      setMessageIsError(true);
+      setMessage((Array.isArray(data) ? data[0] : data?.detail) || 'Registration could not be completed.');
     } finally { setWorking(false); }
   };
 
@@ -98,8 +121,10 @@ export default function LiveClassDetailPage({ params }: { params: Promise<{ slug
               {working ? 'Preparing access…' : item.access_type === 'free' ? 'Reserve my place' : `Buy access · ${money(item.price, item.currency)}`}
             </button>
           )}
+          {!hasAccess && user && (item.viewer_access_status === 'pending' || paymentReference) && <button type="button" className="lc-button lc-button-quiet lc-button-block" disabled={working} onClick={() => void confirmPayment()}>Check payment</button>}
+          {!hasAccess && !user && paymentReference && <p className="lc-notice">Sign in to the account you used to pay so we can confirm your booking.</p>}
           <p className="lc-secure"><ShieldCheck /> Access is checked by Ed3Hub before entry.</p>
-          {message && <div className={message.includes('could not') ? 'lc-notice is-error' : 'lc-notice is-success'}>{message}</div>}
+          {message && <div role="status" className={messageIsError ? 'lc-notice is-error' : 'lc-notice is-success'}>{message}</div>}
         </aside>
       </header>
 

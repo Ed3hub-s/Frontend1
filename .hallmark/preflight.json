@@ -1,0 +1,8 @@
+{
+  "date": "2026-09-16",
+  "font_stack": "Poppins headings and Open Sans body; Archivo added for Live Classes display",
+  "palette": "Existing blue brand anchors with OKLCH live-class tokens",
+  "motion": "motion-on (Framer Motion installed), restrained on Live Classes",
+  "spacing": "Tailwind scale with a 4px semantic live-class scale",
+  "framework": "Next.js 16 App Router"
+}

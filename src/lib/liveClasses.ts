@@ -65,7 +65,7 @@ export const liveClassesApi = {
   update: (slug: string, data: FormData | Record<string, unknown>) => api.patch(`/live-classes/educator/${slug}/`, data),
   remove: (slug: string) => api.delete(`/live-classes/educator/${slug}/`),
   register: (slug: string) => api.post(`/live-classes/${slug}/register/`),
-  verifyPayment: (slug: string, reference: string) => api.post(`/live-classes/${slug}/verify-payment/`, { reference }),
+  verifyPayment: (slug: string, reference?: string) => api.post(`/live-classes/${slug}/verify-payment/`, reference ? { reference } : {}),
   join: (slug: string) => api.post<ClassroomAccess>(`/live-classes/${slug}/join/`),
   leave: (slug: string, attendanceId: number) => api.post(`/live-classes/${slug}/leave/`, { attendance_id: attendanceId }),
 };

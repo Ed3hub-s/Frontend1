@@ -14,6 +14,9 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const verified = searchParams.get("verified") === "1";
   const passwordReset = searchParams.get("reset") === "1";
+  const requestedNext = searchParams.get("next");
+  const nextPath = requestedNext?.startsWith('/') && !requestedNext.startsWith('//') && !/[\\\u0000-\u001f]/.test(requestedNext)
+    ? requestedNext : null;
   const { login, googleAuth, user, loading } = useAuth();
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -28,9 +31,9 @@ function SignInContent() {
 
   React.useEffect(() => {
     if (!loading && user) {
-      router.replace(dashboardPathForRole(user.role));
+      router.replace(nextPath || dashboardPathForRole(user.role));
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, nextPath]);
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -44,7 +47,7 @@ function SignInContent() {
           // New user on sign-in page — let them pick a role
           setShowRolePicker(true);
         } else {
-          router.push(dashboardPathForRole(role));
+          router.push(nextPath || dashboardPathForRole(role));
         }
       } catch {
         setError("Google sign-in failed. Please try again.");
@@ -60,7 +63,7 @@ function SignInContent() {
     try {
       // Pass role only for new user registration — backend ignores it for existing users
       const { role } = await googleAuth(googleToken, googleRole);
-      router.push(dashboardPathForRole(role));
+      router.push(nextPath || dashboardPathForRole(role));
     } catch {
       setError("Failed to complete sign-in. Please try again.");
       setShowRolePicker(false);
@@ -77,7 +80,7 @@ function SignInContent() {
     setSubmitting(true);
     try {
       const role = await login(username, password);
-      router.push(dashboardPathForRole(role));
+      router.push(nextPath || dashboardPathForRole(role));
     } catch (err: unknown) {
       const e = err as { response?: { data?: { detail?: string; unverified?: boolean; email?: string } } };
       const data = e.response?.data;
